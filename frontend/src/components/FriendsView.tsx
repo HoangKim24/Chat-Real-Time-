@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useFriendStore } from '../store/useFriendStore';
+import type { Friend } from '../services/friendService';
 
 const FriendsView = () => {
   const { friends, friendRequests, fetchFriends, fetchFriendRequests, sendFriendRequest, acceptFriendRequest, isLoading } = useFriendStore();
@@ -32,7 +33,7 @@ const FriendsView = () => {
   
   const displayFriends = activeTab === 'online' ? filteredOnlineFriends : filteredAllFriends;
 
-  const renderFriendItem = (friend: any) => (
+  const renderFriendItem = (friend: Friend) => (
     <div key={friend.id} className="flex items-center justify-between p-3 px-4 hover:bg-white/5 rounded-xl group transition-colors cursor-pointer border border-transparent hover:border-white/5">
       <div className="flex items-center gap-4 flex-1 min-w-0">
         <div className="relative shrink-0">

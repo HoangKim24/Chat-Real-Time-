@@ -1,11 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useMessageStore } from '../store/useMessageStore';
 import { useConversationStore } from '../store/useConversationStore';
-
-interface ChatAreaProps {
-  onChannelClick?: () => void;
-}
 
 interface Reaction {
   emoji: string;
@@ -35,13 +31,13 @@ interface LocalMessage {
   };
 }
 
-const ChatArea = ({ onChannelClick: _onChannelClick }: ChatAreaProps) => {
+const ChatArea = () => {
   const { user } = useAuthStore();
   const { messages: apiMessages, fetchMessages, sendMessage, editMessage, deleteMessage, isLoading } = useMessageStore();
   const { activeConversation } = useConversationStore();
   
   const [messageInput, setMessageInput] = useState('');
-  const [localMessages, setLocalMessages] = useState<LocalMessage[]>([]);
+  const [reactionsByMessage, setReactionsByMessage] = useState<Record<number, Reaction[]>>({});
   const [replyingTo, setReplyingTo] = useState<LocalMessage | null>(null);
   const [editingMessage, setEditingMessage] = useState<LocalMessage | null>(null);
   const [editContent, setEditContent] = useState('');
@@ -55,9 +51,8 @@ const ChatArea = ({ onChannelClick: _onChannelClick }: ChatAreaProps) => {
     }
   }, [activeConversation?.id, fetchMessages]);
 
-  // Transform API messages to local format
-  useEffect(() => {
-    const transformed: LocalMessage[] = apiMessages.map(msg => ({
+  const localMessages = useMemo<LocalMessage[]>(() => {
+    return apiMessages.map(msg => ({
       id: msg.id,
       senderId: msg.senderId,
       senderName: msg.senderName || 'Người dùng',
@@ -65,11 +60,10 @@ const ChatArea = ({ onChannelClick: _onChannelClick }: ChatAreaProps) => {
       content: msg.content,
       createdAt: msg.createdAt,
       isMe: msg.senderId === user?.id,
-      reactions: [],
+      reactions: reactionsByMessage[msg.id] || [],
       isEdited: msg.isEdited,
     }));
-    setLocalMessages(transformed);
-  }, [apiMessages, user?.id]);
+  }, [apiMessages, user?.id, reactionsByMessage]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -136,23 +130,30 @@ const ChatArea = ({ onChannelClick: _onChannelClick }: ChatAreaProps) => {
   };
 
   const handleReaction = (messageId: number, emoji: string) => {
-    setLocalMessages(prev => prev.map(msg => {
-      if (msg.id === messageId) {
-        const existingReaction = msg.reactions.find(r => r.emoji === emoji);
-        if (existingReaction) {
-          if (existingReaction.me) {
-            const newReactions = msg.reactions.map(r => r.emoji === emoji ? { ...r, count: r.count - 1, me: false } : r).filter(r => r.count > 0);
-            return { ...msg, reactions: newReactions };
-          } else {
-            const newReactions = msg.reactions.map(r => r.emoji === emoji ? { ...r, count: r.count + 1, me: true } : r);
-            return { ...msg, reactions: newReactions };
-          }
+    setReactionsByMessage((prev) => {
+      const currentReactions = prev[messageId] || [];
+      const existingReaction = currentReactions.find((reaction) => reaction.emoji === emoji);
+
+      let nextReactions: Reaction[];
+      if (existingReaction) {
+        if (existingReaction.me) {
+          nextReactions = currentReactions
+            .map((reaction) => (reaction.emoji === emoji ? { ...reaction, count: reaction.count - 1, me: false } : reaction))
+            .filter((reaction) => reaction.count > 0);
         } else {
-          return { ...msg, reactions: [...msg.reactions, { emoji, count: 1, me: true }] };
+          nextReactions = currentReactions.map((reaction) =>
+            reaction.emoji === emoji ? { ...reaction, count: reaction.count + 1, me: true } : reaction
+          );
         }
+      } else {
+        nextReactions = [...currentReactions, { emoji, count: 1, me: true }];
       }
-      return msg;
-    }));
+
+      return {
+        ...prev,
+        [messageId]: nextReactions,
+      };
+    });
     setShowEmojiPicker(null);
   };
 
