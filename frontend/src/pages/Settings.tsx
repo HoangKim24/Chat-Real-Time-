@@ -1,7 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ChannelSidebar from '../components/ChannelSidebar';
 import { useAuthStore } from '../store/useAuthStore';
+import {
+  applyAppearancePrefs,
+  getDefaultAppearancePrefs,
+  loadAppearancePrefs,
+  saveAppearancePrefs,
+  type AppearanceAccent,
+  type AppearanceFontSize,
+  type AppearanceTheme,
+} from '../services/appearanceService';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -19,11 +28,39 @@ const Settings = () => {
     friendRequests: true,
     desktopNotifications: false,
   });
-  const [appearancePrefs, setAppearancePrefs] = useState({
-    theme: 'dark',
-    accentColor: 'cyan',
-    fontSize: 'normal',
-  });
+  const [appearancePrefs, setAppearancePrefs] = useState(() => loadAppearancePrefs());
+
+  useEffect(() => {
+    applyAppearancePrefs(appearancePrefs);
+    saveAppearancePrefs(appearancePrefs);
+  }, [appearancePrefs]);
+
+  const accentStyleMap: Record<AppearanceAccent, { selectedThemeCard: string; selectedButton: string }> = {
+    cyan: {
+      selectedThemeCard: 'border-cyan-500 bg-cyan-500/10',
+      selectedButton: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50',
+    },
+    violet: {
+      selectedThemeCard: 'border-violet-500 bg-violet-500/10',
+      selectedButton: 'bg-violet-500/20 text-violet-300 border-violet-500/50',
+    },
+    pink: {
+      selectedThemeCard: 'border-pink-500 bg-pink-500/10',
+      selectedButton: 'bg-pink-500/20 text-pink-300 border-pink-500/50',
+    },
+    green: {
+      selectedThemeCard: 'border-emerald-500 bg-emerald-500/10',
+      selectedButton: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50',
+    },
+    blue: {
+      selectedThemeCard: 'border-blue-500 bg-blue-500/10',
+      selectedButton: 'bg-blue-500/20 text-blue-300 border-blue-500/50',
+    },
+    amber: {
+      selectedThemeCard: 'border-amber-500 bg-amber-500/10',
+      selectedButton: 'bg-amber-500/20 text-amber-300 border-amber-500/50',
+    },
+  };
 
   const handleSaveProfile = async () => {
     if (!editDisplayName.trim()) {
@@ -61,7 +98,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="flex h-screen bg-[#030712] text-white overflow-hidden relative">
+    <div className="theme-shell flex h-screen overflow-hidden relative">
       {/* Background Decor */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-600 rounded-full mix-blend-screen filter blur-[150px] opacity-10 pointer-events-none"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyan-600 rounded-full mix-blend-screen filter blur-[150px] opacity-10 pointer-events-none"></div>
@@ -70,19 +107,21 @@ const Settings = () => {
 
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-transparent z-10 relative">
         {/* Header */}
-        <div className="h-16 flex items-center px-4 md:px-8 shrink-0 border-b border-white/5 bg-slate-900/40 backdrop-blur-md z-10 shadow-sm">
+        <div className="theme-header h-16 flex items-center px-4 md:px-8 shrink-0 border-b border-white/5 backdrop-blur-md z-10 shadow-sm">
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden text-slate-400 hover:text-white p-2 rounded-lg transition-colors mr-4"
+            className="flex items-center gap-2 text-slate-500 hover:text-slate-900 bg-white/70 hover:bg-white border border-slate-200 px-3 py-2 rounded-xl transition-colors mr-4 shadow-sm"
+            title={sidebarOpen ? 'Ẩn cài đặt' : 'Hiện cài đặt'}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            <span className="hidden md:inline text-sm font-semibold">{sidebarOpen ? 'Ẩn menu' : 'Hiện menu'}</span>
           </button>
-          <h3 className="text-white font-bold text-xl">Cài đặt</h3>
+          <h3 className="theme-text font-bold text-xl">Cài đặt</h3>
         </div>
 
         <div className="flex-1 flex overflow-hidden">
           {/* Settings Sidebar - Responsive */}
-          <div className={`${sidebarOpen ? 'w-56' : 'w-0'} md:w-56 bg-slate-900/30 border-r border-white/5 py-6 px-4 flex flex-col gap-1 overflow-hidden transition-all duration-300 shrink-0 backdrop-blur-md`}>
+          <div className={`${sidebarOpen ? 'w-56 md:w-56' : 'w-0 md:w-0'} bg-slate-900/30 border-r border-white/5 py-6 px-4 flex flex-col gap-1 overflow-hidden transition-all duration-300 shrink-0 backdrop-blur-md`}>
              <div className="text-xs font-semibold text-white/50 uppercase tracking-widest px-3 mb-3">Cài đặt</div>
              
              {[
@@ -335,8 +374,8 @@ const Settings = () => {
                        ].map(theme => (
                          <button
                            key={theme.id}
-                           onClick={() => setAppearancePrefs({ ...appearancePrefs, theme: theme.id })}
-                           className={`p-6 rounded-2xl border-2 transition-all duration-200 ${appearancePrefs.theme === theme.id ? 'border-cyan-500 bg-cyan-500/10' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
+                           onClick={() => setAppearancePrefs({ ...appearancePrefs, theme: theme.id as AppearanceTheme })}
+                           className={`p-6 rounded-2xl border-2 transition-all duration-200 ${appearancePrefs.theme === theme.id ? accentStyleMap[appearancePrefs.accentColor].selectedThemeCard : 'border-white/10 bg-white/5 hover:border-white/20'}`}
                          >
                            <div className="flex items-center gap-3 mb-4">
                              <span className="text-2xl">{theme.icon}</span>
@@ -360,20 +399,20 @@ const Settings = () => {
                      </div>
                      <div className="flex flex-wrap gap-4">
                        {[
-                         { id: 'cyan', name: 'Xanh ngọc', color: 'bg-cyan-500', accent: 'ring-cyan-400' },
-                         { id: 'violet', name: 'Tím', color: 'bg-violet-500', accent: 'ring-violet-400' },
-                         { id: 'pink', name: 'Hồng', color: 'bg-pink-500', accent: 'ring-pink-400' },
-                         { id: 'green', name: 'Xanh lá', color: 'bg-emerald-500', accent: 'ring-emerald-400' },
-                         { id: 'blue', name: 'Xanh dương', color: 'bg-blue-500', accent: 'ring-blue-400' },
-                         { id: 'amber', name: 'Cam', color: 'bg-amber-500', accent: 'ring-amber-400' },
+                         { id: 'cyan', name: 'Xanh ngọc', color: 'bg-cyan-500', accent: 'ring-cyan-400', shadow: 'shadow-cyan-500/50' },
+                         { id: 'violet', name: 'Tím', color: 'bg-violet-500', accent: 'ring-violet-400', shadow: 'shadow-violet-500/50' },
+                         { id: 'pink', name: 'Hồng', color: 'bg-pink-500', accent: 'ring-pink-400', shadow: 'shadow-pink-500/50' },
+                         { id: 'green', name: 'Xanh lá', color: 'bg-emerald-500', accent: 'ring-emerald-400', shadow: 'shadow-emerald-500/50' },
+                         { id: 'blue', name: 'Xanh dương', color: 'bg-blue-500', accent: 'ring-blue-400', shadow: 'shadow-blue-500/50' },
+                         { id: 'amber', name: 'Cam', color: 'bg-amber-500', accent: 'ring-amber-400', shadow: 'shadow-amber-500/50' },
                        ].map(accent => (
                          <button
                            key={accent.id}
-                           onClick={() => setAppearancePrefs({ ...appearancePrefs, accentColor: accent.id })}
+                           onClick={() => setAppearancePrefs({ ...appearancePrefs, accentColor: accent.id as AppearanceAccent })}
                            className={`relative group`}
                            title={accent.name}
                          >
-                           <div className={`w-12 h-12 rounded-2xl ${accent.color} transition-all duration-200 ${appearancePrefs.accentColor === accent.id ? `ring-4 ${accent.accent} shadow-lg shadow-${accent.id}-500/50` : 'hover:ring-2 ring-white/30'}`}></div>
+                           <div className={`w-12 h-12 rounded-2xl ${accent.color} transition-all duration-200 ${appearancePrefs.accentColor === accent.id ? `ring-4 ${accent.accent} shadow-lg ${accent.shadow}` : 'hover:ring-2 ring-white/30'}`}></div>
                            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-white/60 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">{accent.name}</span>
                          </button>
                        ))}
@@ -394,13 +433,22 @@ const Settings = () => {
                        ].map(size => (
                          <button
                            key={size.id}
-                           onClick={() => setAppearancePrefs({ ...appearancePrefs, fontSize: size.id })}
-                           className={`px-6 py-2.5 rounded-xl transition-all duration-200 font-semibold ${appearancePrefs.fontSize === size.id ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50' : 'bg-white/5 text-white/70 border border-white/10 hover:border-white/20'}`}
+                           onClick={() => setAppearancePrefs({ ...appearancePrefs, fontSize: size.id as AppearanceFontSize })}
+                           className={`px-6 py-2.5 rounded-xl transition-all duration-200 font-semibold border ${appearancePrefs.fontSize === size.id ? accentStyleMap[appearancePrefs.accentColor].selectedButton : 'bg-white/5 text-white/70 border-white/10 hover:border-white/20'}`}
                          >
                            <span className={size.size}>{size.label}</span>
                          </button>
                        ))}
                      </div>
+                   </div>
+
+                   <div className="flex justify-end">
+                     <button
+                       onClick={() => setAppearancePrefs(getDefaultAppearancePrefs())}
+                       className="px-4 py-2 rounded-xl text-xs font-semibold bg-white/5 text-white/70 border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all"
+                     >
+                       Khôi phục mặc định
+                     </button>
                    </div>
                  </div>
                </div>

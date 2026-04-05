@@ -14,13 +14,14 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { ToastContainer } from './components/Toast';
 import { useToast } from './store/useToastStore';
 import { useAuthStore } from './store/useAuthStore';
+import { applyAppearancePrefs, loadAppearancePrefs } from './services/appearanceService';
 
 const MainApp = () => {
   const [currentView, setCurrentView] = useState<'chat' | 'friends'>('chat');
   const { toasts, removeToast } = useToast();
 
   return (
-    <div className="flex w-full h-screen overflow-hidden bg-[#030712] text-white relative">
+    <div className="theme-shell flex w-full h-screen overflow-hidden relative">
       {/* Global Background Decor */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-600 rounded-full mix-blend-screen filter blur-[150px] opacity-10 pointer-events-none"></div>
       <div className="absolute bottom-[-16%] right-[-10%] w-[44%] h-[44%] bg-cyan-500 rounded-full mix-blend-screen filter blur-[170px] opacity-10 pointer-events-none"></div>
@@ -80,6 +81,7 @@ function App() {
   // Initialize auth from localStorage on app load
   useEffect(() => {
     initialize();
+    applyAppearancePrefs(loadAppearancePrefs());
   }, [initialize]);
 
   return (
