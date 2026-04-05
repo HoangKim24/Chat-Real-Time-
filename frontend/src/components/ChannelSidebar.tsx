@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Modal from './Modal';
 import { useAuthStore } from '../store/useAuthStore';
 import { useConversationStore } from '../store/useConversationStore';
 import { useServerStore } from '../store/useServerStore';
+import { useToast } from '../store/useToastStore';
 
 interface ChannelSidebarProps {
   onChannelClick?: () => void;
@@ -12,13 +13,18 @@ interface ChannelSidebarProps {
 const ChannelSidebar = ({ onChannelClick }: ChannelSidebarProps) => {
   const { user, logout } = useAuthStore();
   const { conversations, activeConversation, fetchConversations, selectConversation } = useConversationStore();
-  const { activeServer, channels, createChannel } = useServerStore();
+  const { activeServer, channels, createChannel, clearActive, renameServer } = useServerStore();
+  const { addToast } = useToast();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [isWorkspaceModalOpen, setWorkspaceModalOpen] = useState(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const [isAddChannelModalOpen, setAddChannelModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [newChannelName, setNewChannelName] = useState('');
+  const [isRenamingWorkspace, setIsRenamingWorkspace] = useState(false);
+  const [workspaceNameDraft, setWorkspaceNameDraft] = useState('');
 
   useEffect(() => {
     fetchConversations();
@@ -46,6 +52,58 @@ const ChannelSidebar = ({ onChannelClick }: ChannelSidebarProps) => {
     window.location.href = '/login';
   };
 
+  const handleSettingsToggle = () => {
+    setIsMobileMenuOpen(false);
+    navigate(location.pathname === '/settings' ? '/app' : '/settings');
+  };
+
+  const openWorkspaceModal = () => {
+    setWorkspaceNameDraft(activeServer?.serverName || '');
+    setIsRenamingWorkspace(false);
+    setWorkspaceModalOpen(true);
+  };
+
+  const handleInvitePeople = async () => {
+    const workspaceName = activeServer?.serverName || 'Trụ sở Chatflow';
+    const inviteText = `Mời bạn tham gia workspace: ${workspaceName}`;
+
+    try {
+      await navigator.clipboard.writeText(inviteText);
+      addToast('Đã copy lời mời workspace', 'success');
+    } catch {
+      addToast('Không thể copy lời mời lúc này', 'error');
+    }
+
+    setWorkspaceModalOpen(false);
+  };
+
+  const handleWorkspaceRename = () => {
+    if (!activeServer) {
+      addToast('Không có workspace đang mở', 'error');
+      return;
+    }
+
+    const success = renameServer(activeServer.id, workspaceNameDraft);
+
+    if (!success) {
+      addToast('Tên workspace không hợp lệ', 'error');
+      return;
+    }
+
+    addToast('Đã đổi tên workspace', 'success');
+    setIsRenamingWorkspace(false);
+    setWorkspaceModalOpen(false);
+  };
+
+  const handleLeaveWorkspace = () => {
+    clearActive();
+
+    navigate('/app');
+
+    addToast(`Đã rời khỏi ${activeServer?.serverName || 'workspace'}`, 'success');
+    setWorkspaceModalOpen(false);
+  };
+
   return (
     <>
       {/* Mobile Menu Button */}
@@ -67,7 +125,7 @@ const ChannelSidebar = ({ onChannelClick }: ChannelSidebarProps) => {
 
       <div className={`w-64 bg-slate-900/60 backdrop-blur-xl flex flex-col h-full shrink-0 border-r border-white/5 animate-fade-in fixed md:relative z-20 transition-transform md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div 
-          onClick={() => setWorkspaceModalOpen(true)}
+          onClick={openWorkspaceModal}
           className="h-16 flex items-center px-4 shrink-0 border-b border-white/5 cursor-pointer hover:bg-white/5 transition-all duration-300 group"
         >
           <div className="flex items-center gap-3 truncate flex-1 block">
@@ -99,16 +157,41 @@ const ChannelSidebar = ({ onChannelClick }: ChannelSidebarProps) => {
                 <p className="text-sm text-white/50">{activeServer?.description || 'Nơi cùng nhau xây dựng tương lai của nhắn tin.'}</p>
               </div>
               
-              <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors text-cyan-400">
+                <button onClick={handleInvitePeople} className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors text-cyan-400">
                  <span className="font-medium text-sm">Mời mọi người</span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16" className="shrink-0"><path d="M16 21v-2a4 4 0 0 0-4-4H5c-1.2 0-2.3.5-3.1 1.4A4 4 0 0 0 1 19v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
               </button>
-              <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors text-white/70 hover:text-white">
-                 <span className="font-medium text-sm">Cài đặt không gian</span>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16" className="shrink-0"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  <button onClick={() => setIsRenamingWorkspace(true)} className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors text-white/70 hover:text-white">
+                   <span className="font-medium text-sm">Đổi tên workspace</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16" className="shrink-0"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
               </button>
+                {isRenamingWorkspace && (
+                  <div className="space-y-3 rounded-xl border border-white/10 bg-white/5 p-3">
+                    <label className="block text-xs font-semibold text-white/50 uppercase tracking-widest">Tên workspace mới</label>
+                    <input
+                      value={workspaceNameDraft}
+                      onChange={(e) => setWorkspaceNameDraft(e.target.value)}
+                      className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-white outline-none transition focus:border-cyan-400/60"
+                      placeholder="Nhập tên mới"
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <button
+                        onClick={() => setIsRenamingWorkspace(false)}
+                        className="px-3 py-2 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                      >
+                        Hủy
+                      </button>
+                      <button
+                        onClick={handleWorkspaceRename}
+                        className="px-3 py-2 rounded-lg text-sm font-semibold bg-cyan-500 hover:bg-cyan-400 text-slate-950 transition-colors"
+                      >
+                        Lưu tên
+                      </button>
+                    </div>
+                  </div>
+                )}
               <div className="h-[1px] bg-white/10 my-2"></div>
-              <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-red-500/10 transition-colors text-red-500">
+                <button onClick={handleLeaveWorkspace} className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-red-500/10 transition-colors text-red-500">
                  <span className="font-medium text-sm">Rời khỏi không gian</span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16" className="shrink-0"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
               </button>
@@ -195,9 +278,9 @@ const ChannelSidebar = ({ onChannelClick }: ChannelSidebarProps) => {
           </div>
           
           <div className="flex items-center text-slate-400 shrink-0 gap-1">
-            <Link to="/settings" onClick={() => setIsMobileMenuOpen(false)} className="p-1.5 rounded-md hover:bg-white/10 hover:text-white transition-all duration-200 active:scale-90" title="Cài đặt người dùng">
+            <button onClick={handleSettingsToggle} className="p-1.5 rounded-md hover:bg-white/10 hover:text-white transition-all duration-200 active:scale-90" title={location.pathname === '/settings' ? 'Quay về trang trước' : 'Cài đặt người dùng'}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16" className="w-4 h-4"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            </Link>
+            </button>
             <button 
               onClick={handleLogout}
               className="p-1.5 rounded-md hover:bg-red-500/20 hover:text-red-400 transition-all duration-200 active:scale-90" 

@@ -16,7 +16,6 @@ const Settings = () => {
   const navigate = useNavigate();
   const { user, updateProfile, logout, isLoading } = useAuthStore();
   const [activeTab, setActiveTab] = useState('profile');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editDisplayName, setEditDisplayName] = useState(user?.displayName || '');
   const [editBio, setEditBio] = useState(user?.bio || '');
@@ -108,20 +107,12 @@ const Settings = () => {
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-transparent z-10 relative">
         {/* Header */}
         <div className="theme-header h-16 flex items-center px-4 md:px-8 shrink-0 border-b border-white/5 backdrop-blur-md z-10 shadow-sm">
-          <button 
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="flex items-center gap-2 text-slate-500 hover:text-slate-900 bg-white/70 hover:bg-white border border-slate-200 px-3 py-2 rounded-xl transition-colors mr-4 shadow-sm"
-            title={sidebarOpen ? 'Ẩn cài đặt' : 'Hiện cài đặt'}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-            <span className="hidden md:inline text-sm font-semibold">{sidebarOpen ? 'Ẩn menu' : 'Hiện menu'}</span>
-          </button>
           <h3 className="theme-text font-bold text-xl">Cài đặt</h3>
         </div>
 
         <div className="flex-1 flex overflow-hidden">
           {/* Settings Sidebar - Responsive */}
-          <div className={`${sidebarOpen ? 'w-56 md:w-56' : 'w-0 md:w-0'} bg-slate-900/30 border-r border-white/5 py-6 px-4 flex flex-col gap-1 overflow-hidden transition-all duration-300 shrink-0 backdrop-blur-md`}>
+          <div className="w-56 bg-slate-900/30 border-r border-white/5 py-6 px-4 flex flex-col gap-1 overflow-hidden shrink-0 backdrop-blur-md">
              <div className="text-xs font-semibold text-white/50 uppercase tracking-widest px-3 mb-3">Cài đặt</div>
              
              {[
@@ -132,7 +123,7 @@ const Settings = () => {
              ].map(tab => (
                <button 
                  key={tab.id}
-                 onClick={() => { setActiveTab(tab.id); setSidebarOpen(false); }}
+                 onClick={() => setActiveTab(tab.id)}
                  className={`text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${activeTab === tab.id ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-400/30' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}
                >
                  <span>{tab.icon}</span>

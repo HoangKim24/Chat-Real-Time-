@@ -26,7 +26,10 @@ const MainApp = () => {
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-600 rounded-full mix-blend-screen filter blur-[150px] opacity-10 pointer-events-none"></div>
       <div className="absolute bottom-[-16%] right-[-10%] w-[44%] h-[44%] bg-cyan-500 rounded-full mix-blend-screen filter blur-[170px] opacity-10 pointer-events-none"></div>
       
-      <ServerSidebar onHomeClick={() => setCurrentView('friends')} />
+      <ServerSidebar
+        activeView={currentView}
+        onHomeClick={() => setCurrentView((currentView) => (currentView === 'friends' ? 'chat' : 'friends'))}
+      />
 
       <div key={currentView} className="flex flex-1 min-w-0 overflow-hidden animate-fade-in relative z-10">
         {currentView === 'chat' ? (

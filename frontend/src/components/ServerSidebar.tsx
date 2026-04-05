@@ -4,9 +4,10 @@ import { useServerStore } from '../store/useServerStore';
 
 interface ServerSidebarProps {
   onHomeClick?: () => void;
+  activeView?: 'chat' | 'friends';
 }
 
-const ServerSidebar = ({ onHomeClick }: ServerSidebarProps) => {
+const ServerSidebar = ({ onHomeClick, activeView }: ServerSidebarProps) => {
   const { servers, activeServer, createServer, selectServer } = useServerStore();
   const [isAddServerModalOpen, setAddServerModalOpen] = useState(false);
   const [isNotificationsOpen, setNotificationsOpen] = useState(false);
@@ -60,9 +61,13 @@ const ServerSidebar = ({ onHomeClick }: ServerSidebarProps) => {
       {/* Home / App Logo */}
       <div 
         onClick={onHomeClick}
-        className="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-[20px] hover:rounded-[12px] cursor-pointer flex items-center justify-center text-white font-bold shadow-lg shadow-violet-500/20 active:scale-90 transition-all duration-300 group"
+        title={activeView === 'friends' ? 'Bấm để quay về Chat' : 'Bấm để mở Bạn bè'}
+        className="relative w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-[20px] hover:rounded-[12px] cursor-pointer flex items-center justify-center text-white font-bold shadow-lg shadow-violet-500/20 active:scale-90 transition-all duration-300 group"
       >
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5 group-hover:rotate-12 transition-transform"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        <span className="pointer-events-none absolute left-14 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white opacity-0 shadow-xl transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 translate-x-[-6px] z-[60]">
+          {activeView === 'friends' ? 'Quay về Chat' : 'Mở Bạn bè'}
+        </span>
       </div>
 
       <div className="w-10 h-[2px] bg-white/5 rounded-full my-1"></div>
@@ -132,10 +137,6 @@ const ServerSidebar = ({ onHomeClick }: ServerSidebarProps) => {
             }`}
           >
             {(server.serverName || 'S').charAt(0).toUpperCase()}
-          </div>
-          {/* Tooltip */}
-          <div className="absolute left-[62px] top-1/2 -translate-y-1/2 bg-slate-900 border border-white/10 text-slate-200 text-sm font-semibold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 translate-x-[-5px] group-hover:translate-x-0 z-[60] shadow-xl whitespace-nowrap">
-            {server.serverName}
           </div>
         </div>
       ))}
