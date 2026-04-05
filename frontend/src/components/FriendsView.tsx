@@ -50,12 +50,12 @@ const FriendsView = () => {
     <div className="flex-1 flex flex-col bg-[#080B12] text-white h-full relative z-10">
       
       {/* Header */}
-      <div className="h-16 flex items-center px-6 pl-14 md:px-6 border-b border-white/5 bg-black/20 backdrop-blur-md shrink-0 sticky top-0 z-20">
-         <div className="flex items-center gap-3">
+      <div className="min-h-16 flex flex-wrap items-center gap-3 px-4 pl-14 md:px-6 py-2 border-b border-white/5 bg-black/20 backdrop-blur-md shrink-0 sticky top-0 z-20">
+        <div className="flex items-center gap-3 shrink-0">
             <svg fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="24" height="24" className="text-cyan-400"><path d="M17 21v-2a4 4 0 0 0-4-4H5c-1.2 0-2.3.5-3.1 1.4A4 4 0 0 0 1 19v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
             <h2 className="font-bold text-lg tracking-wide">Bạn bè</h2>
          </div>
-         <div className="ml-8 flex items-center gap-4 text-sm font-medium border-l border-white/10 pl-4">
+        <div className="flex items-center gap-2 md:gap-4 text-sm font-medium md:border-l border-white/10 md:pl-4 md:ml-2 overflow-x-auto max-w-full">
             <button 
               onClick={() => setActiveTab('online')}
               className={`px-3 py-1.5 rounded-md transition-colors ${activeTab === 'online' ? 'text-white bg-white/10 hover:bg-white/20' : 'text-white/50 hover:text-white/80'}`}
@@ -74,7 +74,7 @@ const FriendsView = () => {
          
          <button 
            onClick={() => setShowAddFriend(!showAddFriend)}
-           className="ml-auto bg-green-500 hover:bg-green-600 text-white font-semibold text-sm px-4 py-1.5 rounded-md shadow-[0_0_10px_rgba(34,197,94,0.3)] transition-all"
+           className="md:ml-auto bg-green-500 hover:bg-green-600 text-white font-semibold text-sm px-4 py-1.5 rounded-md shadow-[0_0_10px_rgba(34,197,94,0.3)] transition-all"
          >Thêm bạn bè</button>
       </div>
 

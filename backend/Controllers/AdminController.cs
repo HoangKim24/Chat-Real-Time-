@@ -40,7 +40,7 @@ public class AdminController : ControllerBase
     }
     
     [HttpGet("stats")]
-    public async Task<ActionResult<object>> GetSystemStats()
+    public ActionResult<object> GetSystemStats()
     {
         var userCount = 12458; // Mocked for now to match UI
         var activeClusters = 842;

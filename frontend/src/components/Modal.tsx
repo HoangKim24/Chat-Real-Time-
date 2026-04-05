@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -8,10 +8,23 @@ interface ModalProps {
 }
 
 const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm z-0"
@@ -19,7 +32,7 @@ const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
       />
       
       {/* Modal Dialog */}
-      <div className="relative z-10 w-full max-w-md bg-[#0F1219] rounded-2xl shadow-2xl border border-white/10 overflow-hidden transform transition-all">
+      <div className="relative z-10 w-full max-w-md max-h-[85vh] bg-[#0F1219] rounded-2xl shadow-2xl border border-white/10 overflow-hidden transform transition-all animate-slide-up">
         {/* Glow effect */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500 to-cyan-500 opacity-80" />
         
@@ -35,7 +48,7 @@ const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
         </div>
 
         {/* Content */}
-        <div className="px-6 py-6 text-[15px] text-white/80">
+        <div className="px-6 py-6 text-[15px] text-white/80 overflow-y-auto max-h-[calc(85vh-76px)] scrollbar-thin scrollbar-thumb-white/20">
           {children}
         </div>
       </div>

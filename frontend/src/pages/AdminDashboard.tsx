@@ -76,15 +76,16 @@ const AdminDashboard = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-y-auto p-10 z-10 font-sans">
+      <div className="flex-1 flex flex-col overflow-y-auto p-6 md:p-10 z-10 font-sans">
           <div className="max-w-7xl w-full mx-auto animate-slide-up">
-             <div className="flex items-end justify-between mb-12">
+             <div className="flex flex-wrap items-end gap-4 justify-between mb-10 md:mb-12">
                <div>
                  <div className="flex items-center gap-2 mb-2">
                    <div className="h-[1px] w-8 bg-emerald-500/40"></div>
                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500/60">Thông tin thời gian thực</span>
                  </div>
                  <h2 className="text-4xl font-black text-white tracking-tight">Tổng quan hệ thống</h2>
+                 <p className="text-xs text-slate-400 mt-3 max-w-xl">Theo dõi số liệu vận hành cốt lõi, trạng thái hạ tầng và hiệu suất xử lý theo thời gian thực.</p>
                </div>
                <div className="flex items-center gap-3 text-[10px] font-black tracking-[0.2em] text-emerald-400 bg-emerald-500/10 px-5 py-2.5 rounded-full border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
@@ -92,8 +93,23 @@ const AdminDashboard = () => {
                </div>
              </div>
 
+             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+               <button className="text-left px-5 py-4 rounded-2xl bg-white/5 border border-white/10 hover:border-cyan-400/30 hover:bg-cyan-500/5 transition-colors">
+                 <div className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black mb-1">Hành động nhanh</div>
+                 <div className="text-sm font-bold text-white">Thêm voucher mới</div>
+               </button>
+               <button className="text-left px-5 py-4 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-400/30 hover:bg-emerald-500/5 transition-colors">
+                 <div className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black mb-1">Hành động nhanh</div>
+                 <div className="text-sm font-bold text-white">Xuất báo cáo hệ thống</div>
+               </button>
+               <button className="text-left px-5 py-4 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-400/30 hover:bg-indigo-500/5 transition-colors">
+                 <div className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-black mb-1">Hành động nhanh</div>
+                 <div className="text-sm font-bold text-white">Kiểm tra nhật ký bảo mật</div>
+               </button>
+             </div>
+
              {/* Stat Cards */}
-             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
                 <div className="glass-panel p-7 rounded-[2rem] hover:scale-[1.02] transition-transform duration-500">
                   <div className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-black mb-3">Người dùng toàn cầu</div>
                   <div className="text-4xl font-black text-white mb-2">{stats?.globalUsers.toLocaleString() ?? '...'}</div>

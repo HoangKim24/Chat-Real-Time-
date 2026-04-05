@@ -402,17 +402,37 @@ const ChatArea = ({ onChannelClick: _onChannelClick }: ChatAreaProps) => {
                 className="bg-transparent border-none text-slate-100 outline-none w-full placeholder-slate-500 text-[15px] flex-1 min-w-0 py-2.5"
               />
 
-              <div className="flex items-center gap-0.5 shrink-0">
-                <button className="text-slate-400 hover:text-cyan-400 p-2 hover:bg-white/5 rounded-xl transition-all hidden sm:flex active:scale-90" title="Thêm biểu tượng cảm xúc">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="16" height="16" className="w-4 h-4"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-                </button>
+              <div className="flex items-center gap-1 shrink-0">
+                <div className="relative">
+                  <button 
+                    onClick={() => setShowEmojiPicker(showEmojiPicker === -1 ? null : -1)}
+                    className="text-slate-400 hover:text-cyan-400 p-2 hover:bg-white/5 rounded-xl transition-all active:scale-90" title="Thêm biểu tượng cảm xúc"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="16" height="16" className="w-4 h-4"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                  </button>
+
+                  {showEmojiPicker === -1 && (
+                    <div className="absolute bottom-full mb-2 right-0 bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-2xl p-3 flex flex-wrap gap-2 w-64 shadow-2xl z-50 animate-fade-in">
+                      {['🔥', '✨', '⚡', '👍', '❤️', '😂', '😄', '😢', '😡', '🎉', '🚀', '💯'].map(emoji => (
+                        <button 
+                          key={emoji} 
+                          onClick={() => { setMessageInput(prev => prev + emoji); setShowEmojiPicker(null); }}
+                          className="hover:scale-125 active:scale-95 transition-all p-2 text-lg shrink-0 hover:bg-white/10 rounded-xl"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
                 <button 
                   onClick={handleSendMessage}
                   disabled={messageInput.trim() === ''}
-                  className="bg-gradient-to-r from-cyan-600 to-indigo-500 hover:from-cyan-500 hover:to-indigo-400 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-400 text-white px-4 h-10 rounded-2xl transition-all shadow-lg shadow-cyan-500/15 active:scale-95 flex items-center justify-center font-bold ml-1 disabled:cursor-not-allowed"
+                  className="bg-gradient-to-br from-cyan-500 to-indigo-500 hover:from-cyan-400 hover:to-indigo-400 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-400 text-white px-4 h-10 rounded-2xl transition-all shadow-lg shadow-cyan-500/25 active:scale-95 flex items-center justify-center font-bold ml-auto disabled:cursor-not-allowed hover:shadow-lg hover:shadow-cyan-400/50"
                 >
-                  <span className="hidden md:inline mr-1.5 text-xs">Gửi</span>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="14" height="14" className="w-3.5 h-3.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  <span className="hidden sm:inline mr-1.5 text-xs font-black uppercase tracking-wider">Gửi</span>
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" className="w-3.5 h-3.5"><path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.8429026 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16346272 C3.34915502,0.9 2.40734225,0.9 1.77946707,1.4429026 L1.15159189,1.4429026 C0.342644975,2.22844149 0.342644975,3.50588171 0.8376543,4.13399899 C0.8376543,4.13399899 0.994623095,4.31193633 1.15159189,4.5762186 L3.03521743,11.0172115 C3.03521743,11.4885037 3.34915502,11.6889879 3.50612381,11.6889879 L16.6915026,12.4744748 Z" /></svg>
                 </button>
               </div>
             </div>

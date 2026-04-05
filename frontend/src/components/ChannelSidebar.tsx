@@ -117,12 +117,15 @@ const ChannelSidebar = ({ onChannelClick }: ChannelSidebarProps) => {
 
         {/* Channel List */}
         <div className="flex-1 overflow-y-auto px-2 py-4 space-y-6 scrollbar-thin">
+          <div className="mx-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/5 text-[11px] text-slate-400">
+            Không gian hiện tại: <span className="text-white font-semibold">{activeServer?.serverName || 'Trụ sở Chatflow'}</span>
+          </div>
           {/* Text Channels from Server */}
           {channels.length > 0 && (
             <div>
               <div className="flex items-center text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2 hover:text-slate-300 transition-colors cursor-pointer group">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="10" height="10" className="mr-1.5 transition-transform group-hover:rotate-90 w-2.5 h-2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                Kênh máy chủ
+                Kênh máy chủ <span className="ml-1 text-slate-500">({channels.length})</span>
                 <button 
                   onClick={(e) => { e.stopPropagation(); setAddChannelModalOpen(true); }}
                   className="ml-auto p-1 rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100"
@@ -148,7 +151,7 @@ const ChannelSidebar = ({ onChannelClick }: ChannelSidebarProps) => {
           <div>
             <div className="flex items-center text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2 hover:text-slate-300 transition-colors cursor-pointer group">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="10" height="10" className="mr-1.5 transition-transform group-hover:rotate-90 w-2.5 h-2.5"><polyline points="9 18 15 12 9 6"/></svg>
-              Hội thoại
+              Hội thoại <span className="ml-1 text-slate-500">({conversations.length})</span>
             </div>
             <div className="space-y-0.5">
               {conversations.map(conv => (
@@ -167,7 +170,9 @@ const ChannelSidebar = ({ onChannelClick }: ChannelSidebarProps) => {
               ))}
 
               {conversations.length === 0 && (
-                <div className="text-xs text-slate-600 px-2 py-2">Chưa có hội thoại nào</div>
+                <div className="mx-2 mt-1 p-3 rounded-xl border border-white/5 bg-white/[0.02] text-xs text-slate-500 leading-relaxed">
+                  Chưa có hội thoại nào. Hãy tạo workspace hoặc mời thêm thành viên để bắt đầu.
+                </div>
               )}
             </div>
           </div>

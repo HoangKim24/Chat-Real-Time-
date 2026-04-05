@@ -44,7 +44,7 @@ const Toast = ({ toast, onClose }: ToastProps) => {
   }[toast.type];
 
   return (
-    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border backdrop-blur-md ${bgColor} animate-slide-up`}>
+    <div className={`relative overflow-hidden flex items-center gap-3 px-4 py-3 rounded-lg border backdrop-blur-md shadow-[0_10px_24px_rgba(2,6,23,0.45)] ${bgColor} animate-slide-up`}>
       <div className="flex-shrink-0">{iconSvg}</div>
       <div className="flex-1 text-sm font-medium">{toast.message}</div>
       <button
@@ -53,6 +53,7 @@ const Toast = ({ toast, onClose }: ToastProps) => {
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
+      <div className="absolute left-0 bottom-0 h-[2px] bg-current/70 toast-progress" style={{ animationDuration: `${toast.duration || 4000}ms` }} />
     </div>
   );
 };
@@ -64,7 +65,7 @@ export interface ToastContainerProps {
 
 export const ToastContainer = ({ toasts, onClose }: ToastContainerProps) => {
   return (
-    <div className="fixed top-4 right-4 z-[100] space-y-2 max-w-md">
+    <div className="fixed top-4 right-4 z-[100] space-y-2 max-w-md w-[calc(100vw-2rem)] sm:w-auto">
       {toasts.map(toast => (
         <Toast key={toast.id} toast={toast} onClose={onClose} />
       ))}

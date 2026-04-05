@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Modal from './Modal';
 import { useServerStore } from '../store/useServerStore';
 
@@ -12,6 +12,37 @@ const ServerSidebar = ({ onHomeClick }: ServerSidebarProps) => {
   const [isNotificationsOpen, setNotificationsOpen] = useState(false);
   const [newServerName, setNewServerName] = useState('');
   const [newServerDescription, setNewServerDescription] = useState('');
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: 'Bạn có lời mời mới', detail: 'Lời mời tham gia workspace vừa được gửi đến bạn.', time: '2 phút trước' },
+    { id: 2, title: 'Kênh mới được tạo', detail: 'Kênh #thong-bao đã được thêm vào workspace.', time: '15 phút trước' },
+  ]);
+  const notificationsRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!isNotificationsOpen) {
+      return;
+    }
+
+    const onPointerDown = (event: MouseEvent) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setNotificationsOpen(false);
+      }
+    };
+
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setNotificationsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('keydown', onEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('keydown', onEscape);
+    };
+  }, [isNotificationsOpen]);
 
   const handleCreateServer = async () => {
     if (!newServerName.trim()) return;
@@ -37,12 +68,17 @@ const ServerSidebar = ({ onHomeClick }: ServerSidebarProps) => {
       <div className="w-10 h-[2px] bg-white/5 rounded-full my-1"></div>
 
       {/* Notifications Node */}
-      <div className="relative group w-full flex justify-center mt-1">
+      <div ref={notificationsRef} className="relative group w-full flex justify-center mt-1">
         <div 
            className="w-10 h-10 bg-white/5 border border-transparent rounded-[20px] hover:rounded-[12px] cursor-pointer flex items-center justify-center text-slate-400 hover:text-white hover:bg-indigo-500 transition-all duration-300 active:scale-90 relative group"
            onClick={() => setNotificationsOpen(!isNotificationsOpen)}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          {notifications.length > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-cyan-500 text-[9px] text-slate-950 font-black flex items-center justify-center">
+              {notifications.length}
+            </span>
+          )}
         </div>
 
         {/* Notifications Dropdown */}
@@ -50,10 +86,31 @@ const ServerSidebar = ({ onHomeClick }: ServerSidebarProps) => {
            <div className="absolute left-16 top-0 w-80 bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl z-50 overflow-hidden transform animate-fade-in origin-top-left">
               <div className="p-5 border-b border-white/10 flex justify-between items-center bg-white/5">
                  <h3 className="font-bold text-white tracking-wide">Thông báo</h3>
-                 <button className="text-xs text-cyan-400 hover:text-cyan-300 font-semibold uppercase tracking-wider">Đánh dấu tất cả</button>
+                 <button
+                   onClick={() => setNotifications([])}
+                   className="text-xs text-cyan-400 hover:text-cyan-300 font-semibold uppercase tracking-wider"
+                 >
+                   Đánh dấu tất cả
+                 </button>
               </div>
               <div className="max-h-96 overflow-y-auto scrollbar-thin">
-                 <div className="p-5 text-center text-sm text-slate-500">Không có thông báo mới</div>
+                {notifications.length === 0 ? (
+                  <div className="p-5 text-center text-sm text-slate-500">Không có thông báo mới</div>
+                ) : (
+                  <div className="divide-y divide-white/5">
+                    {notifications.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => setNotificationsOpen(false)}
+                        className="w-full text-left p-4 hover:bg-white/5 transition-colors"
+                      >
+                        <div className="text-sm font-semibold text-white">{item.title}</div>
+                        <div className="text-xs text-slate-400 mt-1 leading-relaxed">{item.detail}</div>
+                        <div className="text-[11px] text-cyan-400/80 mt-2">{item.time}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
            </div>
         )}

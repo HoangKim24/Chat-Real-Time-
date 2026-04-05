@@ -115,6 +115,11 @@ body::after {
   to { opacity: 1; }
 }
 
+@keyframes toastProgress {
+  from { width: 100%; }
+  to { width: 0; }
+}
+
 @keyframes glowPulse {
   0% { box-shadow: 0 0 5px var(--primary); }
   50% { box-shadow: 0 0 20px var(--primary); }
@@ -131,6 +136,12 @@ body::after {
 
 .neon-glow {
   text-shadow: 0 0 12px var(--secondary);
+}
+
+.toast-progress {
+  animation-name: toastProgress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
 }
 
 /* Scrollbar styling */
