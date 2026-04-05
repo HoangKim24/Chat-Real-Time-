@@ -53,7 +53,7 @@ const MainApp = () => {
             onClick={() => setCurrentView('chat')}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
               currentView === 'chat'
-                ? 'bg-cyan-500/20 text-cyan-200 border border-cyan-400/30'
+                ? 'accent-soft-chip border'
                 : 'text-slate-300 hover:text-white'
             }`}
           >
@@ -63,7 +63,7 @@ const MainApp = () => {
             onClick={() => setCurrentView('friends')}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
               currentView === 'friends'
-                ? 'bg-violet-500/20 text-violet-200 border border-violet-400/30'
+                ? 'accent-soft-chip border'
                 : 'text-slate-300 hover:text-white'
             }`}
           >

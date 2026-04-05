@@ -124,7 +124,7 @@ const Settings = () => {
                <button 
                  key={tab.id}
                  onClick={() => setActiveTab(tab.id)}
-                 className={`text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${activeTab === tab.id ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-400/30' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}
+                 className={`text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 ${activeTab === tab.id ? 'accent-soft-chip border' : 'text-white/70 hover:bg-white/5 hover:text-white'}`}
                >
                  <span>{tab.icon}</span>
                  <span>{tab.label}</span>
