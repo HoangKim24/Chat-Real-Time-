@@ -4,6 +4,7 @@ import { useFriendStore } from '../store/useFriendStore';
 const FriendsView = () => {
   const { friends, friendRequests, fetchFriends, fetchFriendRequests, sendFriendRequest, acceptFriendRequest, isLoading } = useFriendStore();
   const [activeTab, setActiveTab] = useState<'online' | 'all' | 'pending'>('online');
+  const [searchQuery, setSearchQuery] = useState('');
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [friendIdInput, setFriendIdInput] = useState('');
   const [addStatus, setAddStatus] = useState<string | null>(null);
@@ -14,7 +15,47 @@ const FriendsView = () => {
   }, [fetchFriends, fetchFriendRequests]);
 
   const onlineFriends = friends.filter(f => f.status === 'online' || f.status === 'idle' || f.status === 'dnd');
-  const displayFriends = activeTab === 'online' ? onlineFriends : friends;
+  const offlineFriends = friends.filter(f => !f.status || f.status === 'offline');
+  
+  const filteredOnlineFriends = onlineFriends.filter(f => 
+    (f.displayName || f.username).toLowerCase().includes(searchQuery.toLowerCase()) ||
+    f.activity?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const filteredAllFriends = friends.filter(f => 
+    (f.displayName || f.username).toLowerCase().includes(searchQuery.toLowerCase()) ||
+    f.activity?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const filteredOfflineFriends = offlineFriends.filter(f => 
+    (f.displayName || f.username).toLowerCase().includes(searchQuery.toLowerCase()) ||
+    f.activity?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
+  const displayFriends = activeTab === 'online' ? filteredOnlineFriends : filteredAllFriends;
+
+  const renderFriendItem = (friend: any) => (
+    <div key={friend.id} className="flex items-center justify-between p-3 px-4 hover:bg-white/5 rounded-xl group transition-colors cursor-pointer border border-transparent hover:border-white/5">
+      <div className="flex items-center gap-4 flex-1 min-w-0">
+        <div className="relative shrink-0">
+          <img src={friend.avatarUrl || `https://ui-avatars.com/api/?name=${friend.displayName || friend.username}&background=10b981&color=fff`} alt="Avatar" className="w-10 h-10 rounded-full group-hover:shadow-lg transition-all" />
+          <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-black rounded-full flex items-center justify-center">
+            <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor(friend.status)}`}></div>
+          </div>
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="font-semibold text-white/90 text-sm group-hover:text-cyan-400 transition-colors truncate">{friend.displayName || friend.username}</div>
+          {friend.activity && <div className="text-xs text-cyan-400/70 mt-0.5 truncate">{friend.activity}</div>}
+        </div>
+      </div>
+      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <button className="w-8 h-8 bg-black/40 hover:bg-white/10 text-white/60 hover:text-white rounded-lg border border-white/5 transition-colors flex items-center justify-center" title="Nhắn tin">
+          <svg fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="15" height="15"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <button className="w-8 h-8 bg-black/40 hover:bg-white/10 text-white/60 hover:text-white rounded-lg border border-white/5 transition-colors flex items-center justify-center" title="Thêm">
+          <svg fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="15" height="15"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </button>
+      </div>
+    </div>
+  );
 
   const handleSendRequest = async () => {
     const id = parseInt(friendIdInput);
@@ -81,9 +122,21 @@ const FriendsView = () => {
       <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-white/10">
          <div className="max-w-4xl mx-auto w-full">
             
+            {/* Search Bar */}
+            <div className="mb-6 relative">
+              <svg viewBox="0 0 24 24" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input 
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Tìm bạn bè theo tên hoặc hoạt động..."
+                className="w-full bg-slate-900/40 border border-white/10 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/25 rounded-2xl pl-10 pr-4 py-3 text-white outline-none transition-all placeholder-slate-500 text-sm"
+              />
+            </div>
+            
             {/* Add Friend Form */}
             {showAddFriend && (
-              <div className="mb-6 p-4 bg-white/5 border border-white/10 rounded-xl animate-fade-in">
+              <div className="mb-6 p-4 bg-white/5 border border-white/10 rounded-2xl animate-fade-in">
                 <h3 className="text-sm font-bold text-white mb-3 uppercase tracking-wider">Thêm bạn bè theo ID người dùng</h3>
                 <div className="flex gap-3">
                   <input 
@@ -96,7 +149,7 @@ const FriendsView = () => {
                   <button 
                     onClick={handleSendRequest}
                     className="bg-cyan-500 hover:bg-cyan-400 text-white font-bold px-6 rounded-xl transition-all text-sm"
-                  >Gửi lời mời</button>
+                  >Gửi</button>
                 </div>
                 {addStatus && (
                   <p className={`mt-2 text-sm ${addStatus.startsWith('Đã gửi') ? 'text-emerald-400' : 'text-red-400'}`}>{addStatus}</p>
@@ -149,42 +202,51 @@ const FriendsView = () => {
             {/* Friends List (Online / All) */}
             {(activeTab === 'online' || activeTab === 'all') && (
               <>
-                <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">
-                  {activeTab === 'online' ? `Bạn bè trực tuyến — ${onlineFriends.length}` : `Tất cả bạn bè — ${friends.length}`}
-                </h3>
+                {activeTab === 'online' && (
+                  <div className="mb-6 text-xs font-bold text-white/40 uppercase tracking-widest px-1">
+                    Trực tuyến • {filteredOnlineFriends.length} {filteredOnlineFriends.length > 0 && searchQuery && `• Tìm: "${searchQuery}"`}
+                  </div>
+                )}
+                {activeTab === 'all' && filteredOnlineFriends.length > 0 && (
+                  <>
+                    <div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                      Trực tuyến • {filteredOnlineFriends.length}
+                    </div>
+                    <div className="space-y-2 mb-6">
+                      {filteredOnlineFriends.map(friend => renderFriendItem(friend))}
+                    </div>
+                  </>
+                )}
+                
+                {activeTab === 'all' && filteredOfflineFriends.length > 0 && (
+                  <>
+                    <div className="pt-4 border-t border-white/5">
+                      <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+                        Ngoại tuyến • {filteredOfflineFriends.length}
+                      </div>
+                      <div className="space-y-2 opacity-70">
+                        {filteredOfflineFriends.map(friend => renderFriendItem(friend))}
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 {displayFriends.length === 0 && (
-                  <div className="text-center py-8 text-slate-500 text-sm">
-                    {activeTab === 'online' ? 'Hiện chưa có bạn bè nào trực tuyến' : 'Chưa có bạn bè nào. Hãy thêm một vài người!'}
+                  <div className="text-center py-12 text-slate-500">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-white/5 rounded-3xl flex items-center justify-center">
+                      <svg fill="none" stroke="currentColor" strokeWidth="1.5" width="32" height="32"><path d="M17 21v-2a4 4 0 0 0-4-4H5c-1.2 0-2.3.5-3.1 1.4A4 4 0 0 0 1 19v2"/><circle cx="8.5" cy="7" r="4"/></svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-white/40 mb-1">Không tìm thấy ai</h3>
+                    <p className="text-sm">{searchQuery ? `Không có bạn bè nào với "${searchQuery}"` : 'Chưa có bạn bè nào. Hãy thêm một vài người!'}</p>
                   </div>
                 )}
                 
-                <div className="space-y-2">
-                   {displayFriends.map(friend => (
-                     <div key={friend.id} className="flex items-center justify-between p-3 px-4 hover:bg-white/5 rounded-xl group transition-colors cursor-pointer border border-transparent hover:border-white/5">
-                       <div className="flex items-center gap-4">
-                         <div className="relative">
-                           <img src={friend.avatarUrl || `https://ui-avatars.com/api/?name=${friend.displayName || friend.username}&background=10b981&color=fff`} alt="Ảnh đại diện" className="w-10 h-10 rounded-full group-hover:shadow-lg transition-all" />
-                           <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-black rounded-full flex items-center justify-center">
-                              <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor(friend.status)}`}></div>
-                           </div>
-                         </div>
-                         <div>
-                           <div className="font-semibold text-white/90 text-sm group-hover:text-cyan-400 transition-colors">{friend.displayName || friend.username}</div>
-                           {friend.activity && <div className="text-xs text-cyan-400/80 mt-0.5">{friend.activity}</div>}
-                         </div>
-                       </div>
-                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <button className="w-8 h-8 bg-black/40 hover:bg-white/10 text-white/60 hover:text-white rounded-lg border border-white/5 transition-colors flex items-center justify-center" title="Nhắn tin">
-                           <svg fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="15" height="15"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                         </button>
-                         <button className="w-8 h-8 bg-black/40 hover:bg-white/10 text-white/60 hover:text-white rounded-lg border border-white/5 transition-colors flex items-center justify-center" title="Thêm">
-                           <svg fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="15" height="15"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                         </button>
-                       </div>
-                     </div>
-                   ))}
-                </div>
+                {activeTab === 'online' && displayFriends.length > 0 && (
+                  <div className="space-y-2">
+                    {displayFriends.map(friend => renderFriendItem(friend))}
+                  </div>
+                )}
               </>
             )}
 

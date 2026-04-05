@@ -110,32 +110,64 @@ const AdminDashboard = () => {
 
              {/* Stat Cards */}
              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
-                <div className="glass-panel p-7 rounded-[2rem] hover:scale-[1.02] transition-transform duration-500">
-                  <div className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-black mb-3">Người dùng toàn cầu</div>
-                  <div className="text-4xl font-black text-white mb-2">{stats?.globalUsers.toLocaleString() ?? '...'}</div>
-                  <div className="text-emerald-400 text-[10px] font-black flex items-center gap-1 uppercase tracking-widest"><svg fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" width="12" height="12"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> +12% hiệu suất</div>
+                <div className="glass-panel p-7 rounded-[2rem] hover:scale-[1.02] transition-transform duration-500 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 -z-10"></div>
+                  <div className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-black mb-3 flex items-center justify-between">
+                    <span>Người dùng toàn cầu</span>
+                    <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
+                  </div>
+                  <div className="text-4xl font-black text-white mb-3">{stats?.globalUsers.toLocaleString() ?? '...'}</div>
+                  <div className="flex items-end gap-2 h-10 bg-emerald-500/5 rounded-lg p-1 border border-emerald-500/10">
+                    {[2, 4, 3, 5, 4, 6, 5].map((h, i) => (
+                      <div key={i} className="flex-1 bg-gradient-to-t from-emerald-500/60 to-emerald-400/40 rounded-sm" style={{ height: `${h * 5}%` }}></div>
+                    ))}
+                  </div>
+                  <div className="text-emerald-400 text-[10px] font-black flex items-center gap-1 uppercase tracking-widest mt-2"><svg fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" width="12" height="12"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> +12% hiệu suất</div>
                 </div>
                 
-                <div className="glass-panel p-7 rounded-[2rem] hover:scale-[1.02] transition-transform duration-500">
-                  <div className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-black mb-3">Cụm hoạt động</div>
-                  <div className="text-4xl font-black text-white mb-2">{stats?.activeClusters ?? '...'}</div>
-                  <div className="text-emerald-400 text-[10px] font-black flex items-center gap-1 uppercase tracking-widest"><svg fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" width="12" height="12"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> +5% tăng trưởng</div>
+                <div className="glass-panel p-7 rounded-[2rem] hover:scale-[1.02] transition-transform duration-500 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 -z-10"></div>
+                  <div className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-black mb-3 flex items-center justify-between">
+                    <span>Cụm hoạt động</span>
+                    <span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
+                  </div>
+                  <div className="text-4xl font-black text-white mb-3">{stats?.activeClusters ?? '...'}</div>
+                  <div className="grid grid-cols-3 gap-1 h-10 bg-cyan-500/5 rounded-lg p-1 border border-cyan-500/10">
+                    {[1,1,1,1,1,1,1,1,1].map((_, i) => (
+                      <div key={i} className={`rounded-sm ${i % 3 === 0 ? 'bg-cyan-500/60' : i % 2 === 0 ? 'bg-cyan-500/40' : 'bg-cyan-500/20'}`}></div>
+                    ))}
+                  </div>
+                  <div className="text-cyan-400 text-[10px] font-black flex items-center gap-1 uppercase tracking-widest mt-2"><svg fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" width="12" height="12"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> +5% tăng trưởng</div>
                 </div>
 
-                <div className="glass-panel p-7 rounded-[2rem] hover:scale-[1.02] transition-transform duration-500">
-                  <div className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-black mb-3">Lưu lượng</div>
-                  <div className="text-4xl font-black text-white mb-2">{stats?.trafficVolume ?? '...'}</div>
-                  <div className="text-slate-600 text-[10px] font-black uppercase tracking-widest">Mã hóa đầu cuối</div>
+                <div className="glass-panel p-7 rounded-[2rem] hover:scale-[1.02] transition-transform duration-500 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 -z-10"></div>
+                  <div className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-black mb-3 flex items-center justify-between">
+                    <span>Lưu lượng</span>
+                    <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
+                  </div>
+                  <div className="text-4xl font-black text-white mb-3">{stats?.trafficVolume ?? '...'}</div>
+                  <svg viewBox="0 0 100 40" className="w-full h-10 text-indigo-400/50 stroke-indigo-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5">
+                    <polyline points="0,30 10,20 20,25 30,10 40,15 50,5 60,18 70,12 80,22 90,8 100,15"/>
+                  </svg>
+                  <div className="text-indigo-400 text-[10px] font-black uppercase tracking-widest mt-2">Mã hóa đầu cuối</div>
                 </div>
 
-                <div className="glass-panel p-7 rounded-[2rem] flex flex-col justify-between hover:scale-[1.02] transition-transform duration-500">
-                  <div className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-black mb-3">Tải tính toán</div>
+                <div className="glass-panel p-7 rounded-[2rem] flex flex-col justify-between hover:scale-[1.02] transition-transform duration-500 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 -z-10"></div>
+                  <div className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-black mb-3 flex items-center justify-between">
+                    <span>Tải tính toán</span>
+                    <span className={`w-2 h-2 rounded-full animate-pulse ${(stats?.computeLoad ?? 0) > 70 ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]'}`}></span>
+                  </div>
                   <div>
-                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2">
+                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-3">
                       <span className="text-slate-400">Nhân Oracle</span>
-                      <span className="text-emerald-400">{stats?.computeLoad ?? 0}%</span>
+                      <span className={`${(stats?.computeLoad ?? 0) > 70 ? 'text-red-400' : 'text-emerald-400'}`}>{stats?.computeLoad ?? 0}%</span>
                     </div>
-                    <div className="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-white/5"><div className="bg-gradient-to-r from-emerald-600 to-cyan-500 h-full rounded-full" style={{ width: `${stats?.computeLoad ?? 0}%` }}></div></div>
+                    <div className="w-full bg-slate-900 rounded-full h-3 overflow-hidden border border-white/5 relative">
+                      <div className={`${(stats?.computeLoad ?? 0) > 70 ? 'bg-gradient-to-r from-red-600 to-orange-500' : 'bg-gradient-to-r from-emerald-600 to-cyan-500'} h-full rounded-full transition-all duration-300`} style={{ width: `${stats?.computeLoad ?? 0}%` }}></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse"></div>
+                    </div>
                   </div>
                 </div>
              </div>

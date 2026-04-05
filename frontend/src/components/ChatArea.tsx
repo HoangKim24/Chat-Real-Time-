@@ -81,7 +81,19 @@ const ChatArea = ({ onChannelClick: _onChannelClick }: ChatAreaProps) => {
 
   const formatTime = (dateStr: string) => {
     try {
-      return new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const date = new Date(dateStr);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+      
+      if (diffMins < 1) return 'bây giờ';
+      if (diffMins < 60) return `${diffMins}p trước`;
+      if (diffHours < 24) return `${diffHours}h trước`;
+      if (diffDays < 7) return `${diffDays}d trước`;
+      
+      return date.toLocaleDateString('vi-VN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     } catch {
       return dateStr;
     }
@@ -227,17 +239,18 @@ const ChatArea = ({ onChannelClick: _onChannelClick }: ChatAreaProps) => {
                 <div className={`flex flex-col max-w-[70%] ${msg.isMe ? 'items-end' : 'items-start'}`}>
                   {/* Name & Time */}
                   {!msg.isMe && (
-                     <div className="flex items-baseline space-x-2 mb-1 px-1">
+                     <div className="flex items-baseline space-x-2 mb-1.5 px-1">
                        <span className="text-sm font-semibold text-white group-hover:text-cyan-400 transition-colors cursor-pointer">{msg.senderName}</span>
-                       <span className="text-xs text-slate-500 font-medium">{formatTime(msg.createdAt)}</span>
-                       {msg.isEdited && <span className="text-[10px] text-slate-600 italic">(đã sửa)</span>}
+                       <span className="text-[11px] text-slate-500 font-medium" title={new Date(msg.createdAt).toLocaleString()}>{formatTime(msg.createdAt)}</span>
+                       {msg.isEdited && <span className="text-[10px] text-slate-600 italic">(sửa)</span>}
                      </div>
                   )}
                   
                   {msg.isMe && (
-                     <div className="flex items-center space-x-2 mb-1 px-1">
-                       <span className="text-xs text-slate-500 font-medium">{formatTime(msg.createdAt)}</span>
-                       {msg.isEdited && <span className="text-[10px] text-slate-600 italic">(đã sửa)</span>}
+                     <div className="flex items-center space-x-2 mb-1.5 px-1 justify-end">
+                       <span className="text-[11px] text-slate-500 font-medium" title={new Date(msg.createdAt).toLocaleString()}>{formatTime(msg.createdAt)}</span>
+                       {msg.isEdited && <span className="text-[10px] text-slate-600 italic">(sửa)</span>}
+                       <span className="text-[10px] text-cyan-400/70 font-semibold" title="Đã đọc">✓✓</span>
                      </div>
                   )}
 
@@ -361,6 +374,11 @@ const ChatArea = ({ onChannelClick: _onChannelClick }: ChatAreaProps) => {
       {/* Premium Floating Input Box */}
       {activeConversation && (
         <div className="px-4 md:px-8 pb-4 pt-1 shrink-0">
+          {messageInput.length > 0 && (
+            <div className="mb-2 text-[10px] font-semibold text-slate-500 uppercase tracking-widest flex items-center gap-1 px-2">
+              <span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>Đang soạn...
+            </div>
+          )}
           {replyingTo && (
              <div className="bg-slate-800/50 backdrop-blur-md border-t border-x border-white/5 px-4 py-2 rounded-t-2xl flex items-center justify-between animate-fade-in translate-y-1">
                 <div className="flex items-center gap-3 overflow-hidden">
