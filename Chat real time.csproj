@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Chat_real_time</RootNamespace>
+    <DefaultItemExcludes>$(DefaultItemExcludes);backend\**;frontend\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+</Project>

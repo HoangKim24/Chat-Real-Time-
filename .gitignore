@@ -1,0 +1,12 @@
+.vs/
+.vscode/
+bin/
+obj/
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+frontend/vite_log.txt
+backend/build_output.txt
+backend/out.txt
+*.user
