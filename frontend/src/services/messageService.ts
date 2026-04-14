@@ -59,14 +59,13 @@ const messageService = {
     return response.data;
   },
 
-  // Message Read Status
   getReadStatuses: async (conversationId: number): Promise<MessageReadStatus[]> => {
-    const response = await api.get(`/MessageRead/get-messages/conversation/${conversationId}`);
+    const response = await api.get(`/Message/read-status/${conversationId}`);
     return response.data;
   },
 
   markMessageRead: async (data: MarkMessageReadDto) => {
-    const response = await api.post('/MessageRead/message-read', data);
+    const response = await api.post('/Message/message-read', data);
     return response.data;
   },
 };

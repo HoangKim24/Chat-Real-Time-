@@ -1,4 +1,23 @@
-import api from './api';
+import axios from 'axios';
+
+const DEFAULT_SERVER_API_BASE_URL = 'http://localhost:5128/api';
+const SERVER_API_BASE_URL = (import.meta.env.VITE_SERVER_API_BASE_URL ?? DEFAULT_SERVER_API_BASE_URL).replace(/\/$/, '');
+
+const serverApi = axios.create({
+  baseURL: SERVER_API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+serverApi.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
 
 export interface CreateServerDto {
   serverName: string;
@@ -74,50 +93,55 @@ export interface Permission {
 }
 
 const serverService = {
+  getServers: async (): Promise<Server[]> => {
+    const response = await serverApi.get('/Server/get-servers');
+    return response.data;
+  },
+
   // Server
   getServerMembers: async (serverId: number): Promise<ServerMember[]> => {
-    const response = await api.get(`/Server/get-server-members/${serverId}`);
+    const response = await serverApi.get(`/Server/get-server-members/${serverId}`);
     return response.data;
   },
 
   createServer: async (data: CreateServerDto): Promise<Server> => {
-    const response = await api.post('/Server/create-server', data);
+    const response = await serverApi.post('/Server/create-server', data);
     return response.data;
   },
 
   addMember: async (data: AddMemberDto) => {
-    const response = await api.post('/Server/add-member', data);
+    const response = await serverApi.post('/Server/add-member', data);
     return response.data;
   },
 
   createChannel: async (data: CreateChannelDto): Promise<Channel> => {
-    const response = await api.post('/Server/create-channel', data);
+    const response = await serverApi.post('/Server/create-channel', data);
     return response.data;
   },
 
   // Roles & Permissions
   getRoles: async (serverId: number): Promise<Role[]> => {
-    const response = await api.get(`/RoleServer/get-roles/${serverId}`);
+    const response = await serverApi.get(`/RoleServer/get-roles/${serverId}`);
     return response.data;
   },
 
   getPermissions: async (): Promise<Permission[]> => {
-    const response = await api.get('/RoleServer/get-permissions');
+    const response = await serverApi.get('/RoleServer/get-permissions');
     return response.data;
   },
 
   createRole: async (data: CreateRoleDto): Promise<Role> => {
-    const response = await api.post('/RoleServer/create-role', data);
+    const response = await serverApi.post('/RoleServer/create-role', data);
     return response.data;
   },
 
   assignRole: async (data: AssignRoleDto) => {
-    const response = await api.post('/RoleServer/assign-role', data);
+    const response = await serverApi.post('/RoleServer/assign-role', data);
     return response.data;
   },
 
   assignPermission: async (data: AssignPermissionDto) => {
-    const response = await api.post('/RoleServer/assign-permission', data);
+    const response = await serverApi.post('/RoleServer/assign-permission', data);
     return response.data;
   },
 };

@@ -66,6 +66,7 @@ interface ServerState {
   isLoading: boolean;
   error: string | null;
 
+  fetchServers: () => Promise<void>;
   setServers: (servers: Server[]) => void;
   selectServer: (server: Server) => void;
   createServer: (data: CreateServerDto) => Promise<Server | null>;
@@ -84,6 +85,21 @@ export const useServerStore = create<ServerState>((set) => ({
   isLoading: false,
   error: null,
 
+  fetchServers: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const servers = await serverService.getServers();
+      set((state) => {
+        const activeServer = servers.find((server) => server.id === state.activeServer?.id) || servers[0] || null;
+        const channels = activeServer?.channels || [];
+        persistServerState(servers, activeServer);
+        return { servers, activeServer, channels, isLoading: false };
+      });
+    } catch {
+      set({ error: 'Không tải được danh sách workspace', isLoading: false });
+    }
+  },
+
   setServers: (servers) => {
     set((state) => {
       const activeServer = servers.find((server) => server.id === state.activeServer?.id) || servers[0] || null;
@@ -95,7 +111,7 @@ export const useServerStore = create<ServerState>((set) => ({
 
   selectServer: (server) => {
     set((state) => {
-      const selectedServer = state.servers.find((s) => s.id === server.id) || server;
+      const selectedServer = state.servers.find((item) => item.id === server.id) || server;
       persistServerState(state.servers, selectedServer);
       return { activeServer: selectedServer, channels: selectedServer.channels || [] };
     });
@@ -193,7 +209,7 @@ export const useServerStore = create<ServerState>((set) => ({
         const updatedServers = state.servers.map((server) =>
           updatedActiveServer && server.id === updatedActiveServer.id
             ? { ...server, channels: updatedChannels }
-            : server
+            : server,
         );
 
         persistServerState(updatedServers, updatedActiveServer);

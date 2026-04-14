@@ -1,50 +1,55 @@
-using Microsoft.EntityFrameworkCore;
 using ChatApp.Api.Data;
+using ChatApp.Api.Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers();
 
-// Configure database provider
-var connectionString = builder.Configuration.GetConnectionString("OracleDb");
-var hasOracleConnection = !string.IsNullOrWhiteSpace(connectionString)
-  && !connectionString.Contains("YOUR_USER", StringComparison.OrdinalIgnoreCase)
-  && !connectionString.Contains("YOUR_PASSWORD", StringComparison.OrdinalIgnoreCase)
-  && !connectionString.Contains("YOUR_HOST", StringComparison.OrdinalIgnoreCase)
-  && !connectionString.Contains("YOUR_SERVICE", StringComparison.OrdinalIgnoreCase);
+var envConnectionString = Environment.GetEnvironmentVariable("ORACLE_DB_CONNECTION");
+var appsettingsConnectionString = builder.Configuration.GetConnectionString("OracleDb");
+var connectionString = !string.IsNullOrWhiteSpace(envConnectionString)
+    ? envConnectionString
+    : appsettingsConnectionString;
+
+var hasValidOracleConnection = !string.IsNullOrWhiteSpace(connectionString)
+    && !connectionString.Contains("YOUR_USER", StringComparison.OrdinalIgnoreCase)
+    && !connectionString.Contains("YOUR_PASSWORD", StringComparison.OrdinalIgnoreCase)
+    && !connectionString.Contains("YOUR_HOST", StringComparison.OrdinalIgnoreCase)
+    && !connectionString.Contains("YOUR_SERVICE", StringComparison.OrdinalIgnoreCase);
 
 builder.Services.AddDbContext<ChatDbContext>(options =>
 {
-    if (hasOracleConnection)
+    if (hasValidOracleConnection)
     {
         options.UseOracle(connectionString);
+        return;
     }
-    else
-    {
-        options.UseInMemoryDatabase("ChatAppApiDev");
-    }
+
+    options.UseInMemoryDatabase("ChatAppDev");
 });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Enable CORS for frontend
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        builder =>
+    options.AddPolicy("AllowFrontend",
+        corsBuilder =>
         {
-            builder.AllowAnyOrigin()
-                   .AllowAnyMethod()
-                   .AllowAnyHeader();
+            corsBuilder
+                .WithOrigins(
+                    "http://localhost:5173",
+                    "https://localhost:5173",
+                    "http://127.0.0.1:5173",
+                    "https://127.0.0.1:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
         });
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -52,33 +57,156 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
 app.UseAuthorization();
 
 app.MapControllers();
 
-// Ensure database is created / migrated
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ChatDbContext>();
+
     try
     {
-        if (hasOracleConnection)
+        if (context.Database.IsRelational())
         {
             context.Database.Migrate();
-            Console.WriteLine("✅ Oracle Database connected and migrated successfully!");
+            Console.WriteLine("Oracle database connected and migrated successfully.");
         }
         else
         {
-            context.Database.EnsureCreated();
-            Console.WriteLine("✅ Using in-memory database for development.");
+            await context.Database.EnsureCreatedAsync();
+            Console.WriteLine("Using in-memory database for local development.");
         }
+
+        await SeedAuthUserAsync(context);
+        await SeedConversationAsync(context);
+        await SeedServerAsync(context);
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"❌ Database connection failed: {ex.Message}");
+        Console.WriteLine($"Database initialization failed: {ex.Message}");
+        throw;
     }
 }
 
 app.Run();
+
+static async Task SeedAuthUserAsync(ChatDbContext context)
+{
+    const string demoEmail = "demo@chatflow.vn";
+
+    var hasDemoUser = await context.AuthUsers.AnyAsync(user => user.Email == demoEmail);
+    if (hasDemoUser)
+    {
+        return;
+    }
+
+    var now = DateTime.UtcNow;
+    context.AuthUsers.Add(new AuthUser
+    {
+        Email = demoEmail,
+        Username = "demo",
+        Password = "Demo@123456",
+        DisplayName = "Demo User",
+        AvatarUrl = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString("Demo User")}&background=06b6d4&color=fff",
+        Bio = "Tài khoản demo để xem UI/UX",
+        CreatedAt = now,
+        UpdatedAt = now
+    });
+
+    await context.SaveChangesAsync();
+}
+
+static async Task SeedConversationAsync(ChatDbContext context)
+{
+    var now = DateTime.UtcNow;
+
+    var generalConversation = await context.Conversations.FirstOrDefaultAsync(conversation => conversation.Name == "General");
+    if (generalConversation is null)
+    {
+        generalConversation = new ChatConversation
+        {
+            Name = "General",
+            Type = 1,
+            CreatedAt = now
+        };
+
+        context.Conversations.Add(generalConversation);
+        await context.SaveChangesAsync();
+    }
+
+    var demoUser = await context.AuthUsers.FirstOrDefaultAsync(user => user.Email == "demo@chatflow.vn");
+    if (demoUser is null)
+    {
+        return;
+    }
+
+    var hasWelcomeMessage = await context.Messages.AnyAsync(message => message.ConversationId == generalConversation.ChatConversationId);
+    if (hasWelcomeMessage)
+    {
+        return;
+    }
+
+    context.Messages.Add(new ChatMessage
+    {
+        ConversationId = generalConversation.ChatConversationId,
+        SenderUserId = demoUser.AuthUserId,
+        Content = "Chào mừng bạn đến với General.",
+        CreatedAt = now,
+        UpdatedAt = now,
+        IsEdited = false
+    });
+
+    await context.SaveChangesAsync();
+}
+
+static async Task SeedServerAsync(ChatDbContext context)
+{
+    var demoUser = await context.AuthUsers.FirstOrDefaultAsync(user => user.Email == "demo@chatflow.vn");
+    if (demoUser is null)
+    {
+        return;
+    }
+
+    var now = DateTime.UtcNow;
+    var server = await context.Servers.FirstOrDefaultAsync(item => item.ServerName == "hoibaodom");
+    if (server is null)
+    {
+        server = new ChatServer
+        {
+            ServerName = "hoibaodom",
+            Description = "Workspace mặc định",
+            IconUrl = $"https://ui-avatars.com/api/?name={Uri.EscapeDataString("hoibaodom")}&background=7c3aed&color=fff",
+            OwnerId = demoUser.AuthUserId,
+            CreatedAt = now
+        };
+
+        context.Servers.Add(server);
+        await context.SaveChangesAsync();
+    }
+
+    var hasMember = await context.ServerMembers.AnyAsync(member => member.ServerId == server.ChatServerId && member.UserId == demoUser.AuthUserId);
+    if (!hasMember)
+    {
+        context.ServerMembers.Add(new ChatServerMember
+        {
+            ServerId = server.ChatServerId,
+            UserId = demoUser.AuthUserId
+        });
+        await context.SaveChangesAsync();
+    }
+
+    var hasChannel = await context.Channels.AnyAsync(channel => channel.ServerId == server.ChatServerId);
+    if (!hasChannel)
+    {
+        context.Channels.Add(new ChatChannel
+        {
+            ServerId = server.ChatServerId,
+            ChannelName = "general",
+            Type = 0
+        });
+        await context.SaveChangesAsync();
+    }
+}

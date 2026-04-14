@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import messageService from '../services/messageService';
 import type { Message, SendMessageDto, EditMessageDto } from '../services/messageService';
+import { useAuthStore } from './useAuthStore';
 
 interface MessageState {
   messages: Message[];
@@ -23,12 +24,12 @@ export const useMessageStore = create<MessageState>((set) => ({
   error: null,
 
   fetchMessages: async (conversationId) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: null, messages: [] });
     try {
       const messages = await messageService.getMessages(conversationId);
       set({ messages, isLoading: false });
     } catch {
-      set({ error: 'Không tải được tin nhắn', isLoading: false });
+      set({ error: 'Không tải được tin nhắn', isLoading: false, messages: [] });
     }
   },
 
@@ -40,8 +41,30 @@ export const useMessageStore = create<MessageState>((set) => ({
       }));
       return message;
     } catch {
-      set({ error: 'Không gửi được tin nhắn' });
-      return null;
+      const currentUser = useAuthStore.getState().user;
+
+      if (!currentUser) {
+        set({ error: 'Không gửi được tin nhắn' });
+        return null;
+      }
+
+      const localMessage: Message = {
+        id: -Date.now(),
+        senderId: currentUser.id,
+        senderName: currentUser.displayName || currentUser.username,
+        senderAvatar: currentUser.avatarUrl,
+        content: data.content,
+        createdAt: new Date().toISOString(),
+        conversationId: data.conversationId ?? undefined,
+        channelId: data.channelId ?? undefined,
+        isEdited: false,
+      };
+
+      set((state) => ({
+        messages: [...state.messages, localMessage],
+        error: null,
+      }));
+      return localMessage;
     }
   },
 
@@ -49,7 +72,7 @@ export const useMessageStore = create<MessageState>((set) => ({
     try {
       const updated = await messageService.editMessage(data);
       set((state) => ({
-        messages: state.messages.map(m => m.id === updated.id ? updated : m),
+        messages: state.messages.map((message) => message.id === updated.id ? updated : message),
       }));
       return true;
     } catch {
@@ -62,7 +85,7 @@ export const useMessageStore = create<MessageState>((set) => ({
     try {
       await messageService.deleteMessage(messageId);
       set((state) => ({
-        messages: state.messages.filter(m => m.id !== messageId),
+        messages: state.messages.filter((message) => message.id !== messageId),
       }));
       return true;
     } catch {
@@ -71,7 +94,6 @@ export const useMessageStore = create<MessageState>((set) => ({
     }
   },
 
-  // For real-time updates (SignalR)
   addMessage: (message) => {
     set((state) => ({
       messages: [...state.messages, message],
@@ -80,13 +102,13 @@ export const useMessageStore = create<MessageState>((set) => ({
 
   updateMessage: (message) => {
     set((state) => ({
-      messages: state.messages.map(m => m.id === message.id ? message : m),
+      messages: state.messages.map((item) => item.id === message.id ? message : item),
     }));
   },
 
   removeMessage: (messageId) => {
     set((state) => ({
-      messages: state.messages.filter(m => m.id !== messageId),
+      messages: state.messages.filter((message) => message.id !== messageId),
     }));
   },
 

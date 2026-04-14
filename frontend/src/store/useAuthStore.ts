@@ -44,7 +44,7 @@ const buildDemoUser = (data: UserLoginDto | UserRegisterDto): User => {
 };
 
 const persistDemoSession = (user: User) => {
-  const token = `demo-token-${user.id}`;
+  const token = `demo-auth:${user.email}`;
   localStorage.setItem('auth_token', token);
   localStorage.setItem('auth_user', JSON.stringify(user));
   return token;
@@ -91,7 +91,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           return true;
         }
 
-        set({ error: backendMessage || `Tài khoản dùng để đăng nhập là ${DEV_LOGIN_EMAIL} / ${DEV_LOGIN_PASSWORD}`, isLoading: false });
+        set({
+          error: backendMessage || `Tài khoản dùng để đăng nhập là ${DEV_LOGIN_EMAIL} / ${DEV_LOGIN_PASSWORD}`,
+          isLoading: false,
+        });
         return false;
       }
 
@@ -109,6 +112,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return true;
     } catch (error: unknown) {
       const backendMessage = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+
       const message = backendMessage || (isDemoMode
         ? `Hãy dùng tài khoản ${DEV_LOGIN_EMAIL} / ${DEV_LOGIN_PASSWORD}.`
         : 'Đăng ký thất bại. Vui lòng thử lại.');

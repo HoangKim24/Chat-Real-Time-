@@ -18,6 +18,7 @@ For full project setup and architecture, see the root README:
 
 - Dev server: http://localhost:5173
 - API base (default): http://localhost:5128/api
+- Server API base (default): http://localhost:5128/api
 
 The API base URL is configured in:
 
@@ -26,3 +27,9 @@ The API base URL is configured in:
 You can override API base with:
 
 - VITE_API_BASE_URL
+
+You can override server/workspace API base with:
+
+- VITE_SERVER_API_BASE_URL
+
+If you want to use remote API hosts, set both env vars to the same remote base URL.

@@ -53,4 +53,19 @@ public class AdminController : ControllerBase
             ComputeLoad = 45
         };
     }
+
+    [HttpGet("db-status")]
+    public ActionResult<object> GetDatabaseStatus()
+    {
+        var providerName = _context.Database.ProviderName ?? "unknown";
+        var usesOracle = providerName.Contains("Oracle", StringComparison.OrdinalIgnoreCase);
+        var usesInMemory = providerName.Contains("InMemory", StringComparison.OrdinalIgnoreCase);
+
+        return Ok(new
+        {
+            Provider = providerName,
+            UsesOracle = usesOracle,
+            UsesInMemory = usesInMemory
+        });
+    }
 }

@@ -121,6 +121,228 @@ namespace ChatApp.Api.Migrations
 
                     b.ToTable("VOUCHERS", (string)null);
                 });
+
+            modelBuilder.Entity("ChatApp.Api.Models.ChatChannel", b =>
+                {
+                    b.Property<int>("ChatChannelId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("CHAT_CHANNEL_ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChatChannelId"));
+
+                    b.Property<string>("ChannelName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("NVARCHAR2(200)")
+                        .HasColumnName("CHANNEL_NAME");
+
+                    b.Property<int>("ServerId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("SERVER_ID");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("TYPE");
+
+                    b.HasKey("ChatChannelId");
+
+                    b.HasIndex("ServerId");
+
+                    b.ToTable("CHAT_CHANNELS", (string)null);
+                });
+
+            modelBuilder.Entity("ChatApp.Api.Models.ChatServer", b =>
+                {
+                    b.Property<int>("ChatServerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("CHAT_SERVER_ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChatServerId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("NVARCHAR2(500)")
+                        .HasColumnName("DESCRIPTION");
+
+                    b.Property<string>("IconUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("NVARCHAR2(500)")
+                        .HasColumnName("ICON_URL");
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("OWNER_ID");
+
+                    b.Property<string>("ServerName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("NVARCHAR2(200)")
+                        .HasColumnName("SERVER_NAME");
+
+                    b.HasKey("ChatServerId");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("CHAT_SERVERS", (string)null);
+                });
+
+            modelBuilder.Entity("ChatApp.Api.Models.ChatServerMember", b =>
+                {
+                    b.Property<int>("ChatServerMemberId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("CHAT_SERVER_MEMBER_ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChatServerMemberId"));
+
+                    b.Property<int>("ServerId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("SERVER_ID");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("USER_ID");
+
+                    b.HasKey("ChatServerMemberId");
+
+                    b.HasIndex("ServerId", "UserId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CHAT_SERVER_MEMBERS", (string)null);
+                });
+
+            modelBuilder.Entity("ChatApp.Api.Models.AuthUser", b =>
+                {
+                    b.Property<int>("AuthUserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("AUTH_USER_ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AuthUserId"));
+
+                    b.Property<string>("AvatarUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("NVARCHAR2(500)")
+                        .HasColumnName("AVATAR_URL");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT");
+
+                    b.Property<string>("Bio")
+                        .HasMaxLength(1000)
+                        .HasColumnType("NVARCHAR2(1000)")
+                        .HasColumnName("BIO");
+
+                    b.Property<string>("DisplayName")
+                        .HasMaxLength(150)
+                        .HasColumnType("NVARCHAR2(150)")
+                        .HasColumnName("DISPLAY_NAME");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("NVARCHAR2(256)")
+                        .HasColumnName("EMAIL");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("NVARCHAR2(256)")
+                        .HasColumnName("PASSWORD");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)")
+                        .HasColumnName("USERNAME");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("UPDATED_AT");
+
+                    b.HasKey("AuthUserId");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("AUTH_USERS", (string)null);
+                });
+
+            modelBuilder.Entity("ChatApp.Api.Models.ChatConversation", b =>
+                {
+                    b.Property<int>("ChatConversationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("CHAT_CONVERSATION_ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChatConversationId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("NVARCHAR2(200)")
+                        .HasColumnName("NAME");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("TYPE");
+
+                    b.HasKey("ChatConversationId");
+
+                    b.ToTable("CHAT_CONVERSATIONS", (string)null);
+                });
+
+            modelBuilder.Entity("ChatApp.Api.Models.ChatMessage", b =>
+                {
+                    b.Property<int>("ChatMessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("CHAT_MESSAGE_ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChatMessageId"));
+
+                    b.Property<int>("ConversationId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("CONVERSATION_ID");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("NCLOB")
+                        .HasColumnName("CONTENT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("CREATED_AT");
+
+                    b.Property<bool>("IsEdited")
+                        .HasColumnType("NUMBER(1)")
+                        .HasColumnName("IS_EDITED");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnName("UPDATED_AT");
+
+                    b.Property<int>("SenderUserId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("SENDER_USER_ID");
+
+                    b.HasKey("ChatMessageId");
+
+                    b.ToTable("CHAT_MESSAGES", (string)null);
+                });
 #pragma warning restore 612, 618
         }
     }

@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Settings from './pages/Settings';
@@ -22,13 +22,12 @@ const MainApp = () => {
 
   return (
     <div className="theme-shell flex w-full h-screen overflow-hidden relative">
-      {/* Global Background Decor */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-violet-600 rounded-full mix-blend-screen filter blur-[150px] opacity-10 pointer-events-none"></div>
       <div className="absolute bottom-[-16%] right-[-10%] w-[44%] h-[44%] bg-cyan-500 rounded-full mix-blend-screen filter blur-[170px] opacity-10 pointer-events-none"></div>
-      
+
       <ServerSidebar
         activeView={currentView}
-        onHomeClick={() => setCurrentView((currentView) => (currentView === 'friends' ? 'chat' : 'friends'))}
+        onHomeClick={() => setCurrentView((view) => (view === 'friends' ? 'chat' : 'friends'))}
       />
 
       <div key={currentView} className="flex flex-1 min-w-0 overflow-hidden animate-fade-in relative z-10">
@@ -71,7 +70,7 @@ const MainApp = () => {
           </button>
         </div>
       </div>
-      
+
       <ToastContainer toasts={toasts} onClose={removeToast} />
     </div>
   );
@@ -81,7 +80,6 @@ function App() {
   const { toasts, removeToast } = useToast();
   const { initialize, isAuthenticated } = useAuthStore();
 
-  // Initialize auth from localStorage on app load
   useEffect(() => {
     initialize();
     applyAppearancePrefs(loadAppearancePrefs());
@@ -91,19 +89,16 @@ function App() {
     <Router>
       <div className="app-atmosphere" aria-hidden="true" />
       <Routes>
-        {/* Public Auth Routes */}
         <Route path="/login" element={
           isAuthenticated ? <Navigate to="/app" replace /> : <><Login /><ToastContainer toasts={toasts} onClose={removeToast} /></>
         } />
         <Route path="/register" element={
           isAuthenticated ? <Navigate to="/app" replace /> : <><Register /><ToastContainer toasts={toasts} onClose={removeToast} /></>
         } />
-        
-        {/* Admin Routes */}
+
         <Route path="/admin/login" element={<><AdminLogin /><ToastContainer toasts={toasts} onClose={removeToast} /></>} />
         <Route path="/admin/dashboard" element={<><AdminDashboard /><ToastContainer toasts={toasts} onClose={removeToast} /></>} />
 
-        {/* Main App Routes (Protected) */}
         <Route path="/app" element={
           <ProtectedRoute>
             <MainApp />
@@ -115,8 +110,7 @@ function App() {
           </ProtectedRoute>
         } />
 
-        {/* Default Redirect */}
-        <Route path="/" element={<Navigate to={isAuthenticated ? "/app" : "/login"} replace />} />
+        <Route path="/" element={<Navigate to={isAuthenticated ? '/app' : '/login'} replace />} />
       </Routes>
     </Router>
   );

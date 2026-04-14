@@ -108,17 +108,44 @@ Solution build:
 
 ## Environment Configuration
 
+Backend Oracle connection can be configured by either:
+
+- backend/appsettings.json (ConnectionStrings:OracleDb)
+- ORACLE_DB_CONNECTION environment variable
+
+PowerShell example for current terminal:
+
+- $env:ORACLE_DB_CONNECTION = "User Id=YOUR_USER;Password=YOUR_PASSWORD;Data Source=YOUR_HOST:1521/YOUR_SERVICE"
+
+PowerShell example for current user profile (new terminals):
+
+- [System.Environment]::SetEnvironmentVariable("ORACLE_DB_CONNECTION","User Id=YOUR_USER;Password=YOUR_PASSWORD;Data Source=YOUR_HOST:1521/YOUR_SERVICE","User")
+
 Frontend API base URL is configured in:
 
 - frontend/src/services/api.ts
 
+Workspace/server API base is configured in:
+
+- frontend/src/services/serverService.ts
+
 Default value:
+
+- http://localhost:5128/api
+
+Server API default value:
 
 - http://localhost:5128/api
 
 You can override with Vite env variable:
 
 - VITE_API_BASE_URL
+
+You can override workspace/server API with:
+
+- VITE_SERVER_API_BASE_URL
+
+For a single backend deployment, set both variables to the same base URL.
 
 ## Demo Account
 
@@ -129,7 +156,7 @@ You can override with Vite env variable:
 
 - Workspace rename is currently persisted on client (localStorage), not yet synced to backend API.
 - Backend currently exposes Auth and Admin controllers in this repo state.
-- Backend automatically falls back to InMemory database when Oracle connection is not configured.
+- Backend now runs Oracle-only and will stop at startup if Oracle connection is not configured.
 
 ## Git Workflow
 

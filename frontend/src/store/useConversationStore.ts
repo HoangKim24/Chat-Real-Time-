@@ -29,7 +29,13 @@ export const useConversationStore = create<ConversationState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const conversations = await conversationService.getConversations();
-      set({ conversations, isLoading: false });
+      set((state) => ({
+        conversations,
+        activeConversation: state.activeConversation && conversations.some((conversation) => conversation.id === state.activeConversation?.id)
+          ? state.activeConversation
+          : conversations[0] || null,
+        isLoading: false,
+      }));
     } catch {
       set({ error: 'Không tải được danh sách hội thoại', isLoading: false });
     }
@@ -77,7 +83,7 @@ export const useConversationStore = create<ConversationState>((set) => ({
     try {
       await conversationService.leaveConversation({ conversationId, userId });
       set((state) => ({
-        conversations: state.conversations.filter(c => c.id !== conversationId),
+        conversations: state.conversations.filter((conversation) => conversation.id !== conversationId),
         activeConversation: state.activeConversation?.id === conversationId ? null : state.activeConversation,
       }));
       return true;
